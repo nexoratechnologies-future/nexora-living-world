@@ -7,912 +7,460 @@
 <title>NEXORA LIVING WORLD</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;overflow:hidden;background:#152b3b;color:white;font-family:Arial}
+body{margin:0;overflow:hidden;background:#080d18;color:white;font-family:Arial}
 canvas{display:block}
-button{
- border:1px solid #d9ad42;background:#172b40;color:white;
- padding:10px 13px;border-radius:9px;font-weight:bold;
- cursor:pointer
-}
-button:active{background:#9b792d}
-#hud{
- position:fixed;top:10px;left:10px;z-index:3;
- background:#101d2bea;border:1px solid #d9ad42;
- padding:12px;border-radius:12px;min-width:170px;
- font-size:13px;line-height:1.8
-}
-#hud h2{color:#ffd45d;margin:0;font-size:18px}
-#top{
- position:fixed;right:10px;top:10px;z-index:3;
- display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;
- max-width:55%
-}
-#notice{
- position:fixed;top:85px;left:50%;transform:translateX(-50%);
- z-index:3;background:#101d2bee;padding:10px 16px;
- border:1px solid #d9ad42;border-radius:10px;
- text-align:center;max-width:90%;font-size:13px
-}
-#interaction{
- position:fixed;bottom:75px;left:50%;transform:translateX(-50%);
- z-index:4;display:none
-}
-#interaction button{background:#a77d23;color:white;font-size:15px}
-#help{
- position:fixed;bottom:10px;left:50%;transform:translateX(-50%);
- z-index:2;background:#101d2bdc;border-radius:9px;
- padding:8px 12px;font-size:12px;text-align:center;
- max-width:96%;width:max-content
-}
-#mobile{
- position:fixed;bottom:55px;left:10px;z-index:4;
- display:none;grid-template-columns:repeat(3,48px);gap:5px
-}
-#mobile button{height:45px;padding:0;font-size:18px;touch-action:none}
-#actions{
- position:fixed;bottom:60px;right:10px;z-index:4;
- display:none;gap:6px;flex-direction:column
-}
-#actions button{width:75px;height:45px;padding:5px}
-#map{
- position:fixed;right:10px;bottom:145px;width:115px;height:115px;
- z-index:2;background:#172b40;border:1px solid #d9ad42;border-radius:8px
-}
-#menu{
- position:fixed;inset:0;z-index:10;background:#071522ed;
- display:flex;align-items:center;justify-content:center;text-align:center
-}
-.panel{
- width:min(92%,430px);padding:25px;background:#142a40;
- border:1px solid #d9ad42;border-radius:18px
-}
-.panel h1{color:#ffd45d;font-size:32px;margin:5px}
-.panel p{line-height:1.6;color:#dce5ee}
-.panel button{margin:5px}
-#mission{
- position:fixed;left:10px;bottom:10px;z-index:2;
- background:#101d2bdc;padding:8px 12px;border-radius:8px;
- font-size:12px;max-width:210px
-}
-@media(pointer:coarse){
- #mobile{display:grid}
- #actions{display:flex}
- #help{display:none}
- #map{bottom:180px}
- #interaction{bottom:110px}
- #mission{bottom:10px;max-width:170px}
-}
+#hud{position:fixed;top:12px;left:12px;z-index:5;background:#101827dd;padding:12px;border:1px solid #40516c;border-radius:10px}
+#hud b{color:#54e8ff}
+#menu{position:fixed;top:12px;right:12px;z-index:5;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+button,select{background:#172943;color:white;border:1px solid #5b789e;border-radius:7px;padding:10px;font-size:13px}
+button:active{background:#267c9b}
+#help{position:fixed;bottom:12px;left:12px;background:#101827cc;padding:10px;border-radius:8px;font-size:12px}
+#touch{position:fixed;bottom:18px;right:14px;display:none;z-index:6;gap:8px}
+#touch button{width:58px;height:58px;border-radius:50%;font-size:18px}
+#message{position:fixed;top:90px;left:50%;transform:translateX(-50%);background:#101827dd;padding:10px 16px;border-radius:8px;display:none}
+@media (pointer:coarse){#touch{display:flex}}
 </style>
-
-<script type="importmap">
-{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}
-</script>
 </head>
 <body>
 
-<div id="menu">
- <div class="panel">
-  <h1>NEXORA</h1>
-  <h2>LIVING WORLD</h2>
-  <p>Welcome Alex! Start your new life in Nexora City.</p>
-  <button id="newGame">NEW GAME</button>
-  <button id="loadGame">CONTINUE</button>
-  <p style="font-size:11px">MODERN CITY LIFE SIMULATOR · V2.0</p>
- </div>
-</div>
-
 <div id="hud">
- <h2>NEXORA CITY</h2>
- Player: <b>Alex</b><br>
- Money: $<b id="money">500</b><br>
- Home: <b id="homeStatus">No</b><br>
- Vehicle: <b id="vehicleStatus">On foot</b><br>
- Camera: <b id="cameraStatus">Third Person</b>
+  <b>NEXORA LIVING WORLD</b><br>
+  Player: Alex<br>
+  City: Nexora City<br>
+  <span id="status">Loading city...</span><br>
+  <span id="qualityText">Graphics: Balanced</span>
 </div>
 
-<div id="top">
- <button id="cameraBtn">CAMERA: V</button>
- <button id="saveBtn">SAVE</button>
- <button id="dayBtn">DAY/NIGHT</button>
-</div>
-
-<div id="notice">Explore Nexora City. Find a job and build your life!</div>
-
-<div id="mission">
- <b>MISSION</b><br>
- <span id="missionText">Visit the city shop.</span>
-</div>
-
-<canvas id="map" width="230" height="230"></canvas>
-
-<div id="interaction"><button id="interactBtn">INTERACT</button></div>
-
-<div id="mobile">
- <button data-key="w">▲</button>
- <button data-key="w">↑</button>
- <button data-key="w">▲</button>
- <button data-key="a">◀</button>
- <button data-key="s">▼</button>
- <button data-key="d">▶</button>
-</div>
-
-<div id="actions">
- <button data-action="jump">JUMP</button>
- <button data-action="run">RUN</button>
- <button data-action="interact">ACTION</button>
+<div id="menu">
+  <select id="quality">
+    <option value="balanced">Balanced</option>
+    <option value="high">High</option>
+    <option value="4k">4K Mode</option>
+  </select>
+  <button id="camera">Camera: Third Person</button>
+  <button id="day">Day / Night</button>
 </div>
 
 <div id="help">
- WASD: Move | SHIFT: Run | SPACE: Jump | E: Interact | V: Camera
+  PC: WASD move | SHIFT run | SPACE jump | V camera | E interact<br>
+  Mobile: Use the touch buttons
 </div>
+
+<div id="touch">
+  <div>
+    <button data-key="w">▲</button><br>
+    <button data-key="a">◀</button>
+    <button data-key="s">▼</button>
+    <button data-key="d">▶</button>
+  </div>
+  <div>
+    <button data-key=" ">JUMP</button><br>
+    <button data-key="shift">RUN</button>
+    <button id="mobileCamera">CAM</button>
+  </div>
+</div>
+
+<div id="message"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
 
 <script type="module">
 import * as THREE from "three";
 
-// --------------------------------
-// GAME SETUP
-// --------------------------------
-const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x83bddd);
-scene.fog=new THREE.Fog(0x83bddd,90,210);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x8fc9e8);
+scene.fog = new THREE.Fog(0x8fc9e8, 100, 650);
 
-const camera=new THREE.PerspectiveCamera(
- 70,innerWidth/innerHeight,.1,350
+const camera = new THREE.PerspectiveCamera(
+  70, innerWidth / innerHeight, 0.1, 1500
 );
 
-const renderer=new THREE.WebGLRenderer({antialias:false});
-renderer.setSize(innerWidth,innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
-renderer.outputColorSpace=THREE.SRGBColorSpace;
+const renderer = new THREE.WebGLRenderer({
+  antialias: true,
+  powerPreference: "high-performance"
+});
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.25));
+renderer.shadowMap.enabled = false;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
 document.body.appendChild(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0xddeeff,0x43533a,2));
+// LIGHTING
+const skyLight = new THREE.HemisphereLight(0xcceaff, 0x536044, 2);
+scene.add(skyLight);
 
-const sun=new THREE.DirectionalLight(0xffffff,1.5);
-sun.position.set(-40,80,30);
+const sun = new THREE.DirectionalLight(0xffffff, 2);
+sun.position.set(100, 180, 100);
 scene.add(sun);
 
-const mat=(color)=>new THREE.MeshLambertMaterial({color});
+// MATERIALS
+const materials = {
+  road: new THREE.MeshStandardMaterial({color:0x252a32}),
+  grass: new THREE.MeshStandardMaterial({color:0x43824c}),
+  line: new THREE.MeshStandardMaterial({color:0xe7e2bd}),
+  glass: new THREE.MeshStandardMaterial({
+    color:0x6da8c9, metalness:0.35, roughness:0.25
+  }),
+  white: new THREE.MeshStandardMaterial({color:0xe4e8ee}),
+  dark: new THREE.MeshStandardMaterial({color:0x333d4c})
+};
 
-// --------------------------------
-// WORLD
-// --------------------------------
-const ground=new THREE.Mesh(
- new THREE.PlaneGeometry(230,230),mat(0x638b54)
-);
-ground.rotation.x=-Math.PI/2;
-ground.position.y=-.12;
-scene.add(ground);
-
-function makeRoad(x,z,w,d){
- const road=new THREE.Mesh(
-  new THREE.BoxGeometry(w,.08,d),mat(0x343b45)
- );
- road.position.set(x,0,z);
- scene.add(road);
-}
-for(let i=-90;i<=90;i+=30){
- makeRoad(i,0,8,210);
- makeRoad(0,i,210,8);
-}
-
-// Buildings and collision
-const obstacles=[];
-const buildingColors=[0xd2b89b,0x9daeb9,0xe0d4bd,0xa7b8a6,0xc3cbd5];
-
-function makeBuilding(x,z,w,d,h,index){
- const group=new THREE.Group();
- const b=new THREE.Mesh(
-  new THREE.BoxGeometry(w,h,d),
-  mat(buildingColors[index%buildingColors.length])
- );
- b.position.y=h/2;
- group.add(b);
-
- const roof=new THREE.Mesh(
-  new THREE.BoxGeometry(w+.3,.4,d+.3),mat(0x4b5664)
- );
- roof.position.y=h+.2;
- group.add(roof);
-
- const cols=Math.max(2,Math.floor(w/3));
- const rows=Math.max(2,Math.floor(h/4));
- for(let r=0;r<rows;r++){
-  for(let c=0;c<cols;c++){
-   const windowMesh=new THREE.Mesh(
-    new THREE.BoxGeometry(1.1,1.3,.1),mat(0x65a6c9)
-   );
-   windowMesh.position.set(
-    -w/2+1.7+c*(w-2)/cols,
-    2.4+r*3,
-    d/2+.06
-   );
-   group.add(windowMesh);
-   const back=windowMesh.clone();
-   back.position.z=-d/2-.06;
-   group.add(back);
-  }
- }
- group.position.set(x,0,z);
- scene.add(group);
- obstacles.push({x,z,w,d});
-}
-
-let index=0;
-for(let x=-75;x<=75;x+=30){
- for(let z=-75;z<=75;z+=30){
-  if(Math.abs(x)<7&&Math.abs(z)<7)continue;
-  makeBuilding(
-   x+(Math.random()-.5)*3,
-   z+(Math.random()-.5)*3,
-   10+Math.random()*4,
-   10+Math.random()*4,
-   9+Math.random()*19,index++
+function box(w,h,d,mat,x,y,z,parent=scene){
+  const mesh = new THREE.Mesh(
+    new THREE.BoxGeometry(w,h,d), mat
   );
- }
+  mesh.position.set(x,y,z);
+  parent.add(mesh);
+  return mesh;
 }
 
-// Trees
+// GROUND
+box(1600,1,1600,materials.grass,0,-0.6,0);
+
+// HUGE CITY GRID
+const CITY_SIZE = 11;
+const BLOCK = 46;
+const ROAD = 13;
+const cityLimit = CITY_SIZE * BLOCK;
+
+for(let x=-CITY_SIZE/2;x<=CITY_SIZE/2;x++){
+  for(let z=-CITY_SIZE/2;z<=CITY_SIZE/2;z++){
+    const px=x*BLOCK;
+    const pz=z*BLOCK;
+
+    // Road grid
+    box(ROAD,0.15,BLOCK,materials.road,px,0,pz);
+    box(BLOCK,0.15,ROAD,materials.road,px,0,pz);
+
+    // Road markings
+    box(0.25,0.17,BLOCK,materials.line,px,0.09,pz);
+    box(BLOCK,0.17,0.25,materials.line,px,0.09,pz);
+
+    // Four building plots per block
+    for(let sx of [-1,1]){
+      for(let sz of [-1,1]){
+        const bx=px+sx*14;
+        const bz=pz+sz*14;
+        const width=10+Math.random()*6;
+        const depth=10+Math.random()*6;
+        const height=9+Math.random()*65;
+
+        const color=new THREE.Color().setHSL(
+          0.53+Math.random()*0.12,
+          0.12+Math.random()*0.2,
+          0.35+Math.random()*0.3
+        );
+
+        const buildingMat=new THREE.MeshStandardMaterial({
+          color,roughness:0.7
+        });
+
+        box(width,height,depth,buildingMat,
+          bx,height/2,bz);
+
+        // Windows
+        const floors=Math.floor(height/4);
+        for(let f=1;f<floors;f++){
+          if(Math.random()>0.35){
+            box(width*0.65,0.7,0.12,materials.glass,
+              bx,height/2-height/2+f*4,bz+depth/2+0.07);
+          }
+        }
+
+        // Rooftop structure
+        if(height>35){
+          box(width*0.3,2,depth*0.3,materials.dark,
+            bx,height+1,bz);
+        }
+      }
+    }
+  }
+}
+
+// PARKS AND TREES
+const treeMat=new THREE.MeshStandardMaterial({color:0x176a36});
+const trunkMat=new THREE.MeshStandardMaterial({color:0x68452b});
+
 function makeTree(x,z){
- const group=new THREE.Group();
- const trunk=new THREE.Mesh(
-  new THREE.CylinderGeometry(.25,.4,2.4,6),mat(0x79502f)
- );
- trunk.position.y=1.2;
- group.add(trunk);
- const leaves=new THREE.Mesh(
-  new THREE.SphereGeometry(1.8,7,6),mat(0x347749)
- );
- leaves.position.y=3;
- group.add(leaves);
- group.position.set(x,0,z);
- scene.add(group);
-}
-for(let i=0;i<55;i++){
- const x=(Math.random()-.5)*180;
- const z=(Math.random()-.5)*180;
- if(Math.abs(x%30)<7||Math.abs(z%30)<7)continue;
- makeTree(x,z);
+  const trunk=new THREE.Mesh(
+    new THREE.CylinderGeometry(0.4,0.6,4,7),trunkMat
+  );
+  trunk.position.set(x,2,z);
+  scene.add(trunk);
+
+  const leaves=new THREE.Mesh(
+    new THREE.SphereGeometry(2.8,8,7),treeMat
+  );
+  leaves.position.set(x,5,z);
+  scene.add(leaves);
 }
 
-// --------------------------------
+for(let i=0;i<180;i++){
+  const x=(Math.random()-0.5)*cityLimit*1.8;
+  const z=(Math.random()-0.5)*cityLimit*1.8;
+  if(Math.abs(x%BLOCK)>10 && Math.abs(z%BLOCK)>10){
+    makeTree(x,z);
+  }
+}
+
 // PLAYER
-// --------------------------------
 const player=new THREE.Group();
 
-const body=new THREE.Mesh(
- new THREE.CapsuleGeometry(.43,1,3,7),mat(0x267be0)
+const bodyMat=new THREE.MeshStandardMaterial({color:0x2467ce});
+const skinMat=new THREE.MeshStandardMaterial({color:0xd5a27e});
+
+const body= new THREE.Mesh(
+  new THREE.BoxGeometry(1,1.5,0.55),bodyMat
 );
-body.position.y=1.05;
+body.position.y=1.55;
 player.add(body);
 
 const head=new THREE.Mesh(
- new THREE.SphereGeometry(.34,10,8),mat(0xf0bd96)
+  new THREE.SphereGeometry(0.38,12,10),skinMat
 );
-head.position.y=2;
+head.position.y=2.55;
 player.add(head);
 
 scene.add(player);
 player.position.set(0,0,0);
 
-// --------------------------------
-// HOUSE AND INTERIOR
-// --------------------------------
-const housePos=new THREE.Vector3(20,0,0);
-let ownsHouse=false;
-let insideHouse=false;
-
-const houseGroup=new THREE.Group();
-const houseBody=new THREE.Mesh(
- new THREE.BoxGeometry(10,6,9),mat(0xc49a70)
-);
-houseBody.position.y=3;
-houseGroup.add(houseBody);
-
-const houseRoof=new THREE.Mesh(
- new THREE.ConeGeometry(7.5,4,4),mat(0x813f36)
-);
-houseRoof.position.y=8;
-houseRoof.rotation.y=Math.PI/4;
-houseGroup.add(houseRoof);
-
-houseGroup.position.copy(housePos);
-scene.add(houseGroup);
-
-obstacles.push({x:20,z:0,w:10,d:9});
-
-const interior=new THREE.Group();
-const floor=new THREE.Mesh(
- new THREE.BoxGeometry(16,.3,16),mat(0xb59c7d)
-);
-floor.position.y=-.15;
-interior.add(floor);
-
-const wallMat=mat(0xe0d6c7);
-function wall(x,y,z,w,h,d){
- const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),wallMat);
- mesh.position.set(x,y,z);
- interior.add(mesh);
-}
-wall(0,2.5,-8,16,5,.3);
-wall(-8,2.5,0,.3,5,16);
-wall(8,2.5,0,.3,5,16);
-wall(0,2.5,8,16,5,.3);
-
-const sofa=new THREE.Mesh(
- new THREE.BoxGeometry(4,1.2,1.5),mat(0x426b8e)
-);
-sofa.position.set(0,.6,-3);
-interior.add(sofa);
-
-const table=new THREE.Mesh(
- new THREE.BoxGeometry(2,.25,1.5),mat(0x79502f)
-);
-table.position.set(0,1,-.2);
-interior.add(table);
-
-interior.position.set(130,0,0);
-interior.visible=false;
-scene.add(interior);
-
-// --------------------------------
-// SHOP AND JOB CENTRE
-// --------------------------------
-function makeMarker(x,z,color,label){
- const group=new THREE.Group();
- const base=new THREE.Mesh(
-  new THREE.CylinderGeometry(1.3,1.3,.25,12),
-  mat(color)
- );
- base.position.y=.13;
- group.add(base);
-
- const pole=new THREE.Mesh(
-  new THREE.CylinderGeometry(.12,.12,3,8),
-  mat(color)
- );
- pole.position.y=1.7;
- group.add(pole);
-
- const ball=new THREE.Mesh(
-  new THREE.SphereGeometry(.55,10,8),
-  mat(color)
- );
- ball.position.y=3.5;
- group.add(ball);
- group.position.set(x,0,z);
- scene.add(group);
- return group;
-}
-
-const shop=makeMarker(-20,0,0x38bd83,"SHOP");
-const jobCentre=makeMarker(0,-30,0xe2a632,"JOB");
-const houseMarker=makeMarker(20,0,0x48a9ed,"HOUSE");
-
-// --------------------------------
-// VEHICLE
-// --------------------------------
-const car=new THREE.Group();
-
-const carBody=new THREE.Mesh(
- new THREE.BoxGeometry(3.4,1.2,5.5),mat(0xd23c38)
-);
-carBody.position.y=1;
-car.add(carBody);
-
-const cabin=new THREE.Mesh(
- new THREE.BoxGeometry(2.5,1.1,2.6),mat(0x6b9fba)
-);
-cabin.position.set(0,2, -.2);
-car.add(cabin);
-
-const wheels=[];
-for(const x of [-1.7,1.7]){
- for(const z of [-1.7,1.7]){
-  const wheel=new THREE.Mesh(
-   new THREE.CylinderGeometry(.55,.55,.35,12),
-   mat(0x202328)
-  );
-  wheel.rotation.z=Math.PI/2;
-  wheel.position.set(x,.55,z);
-  car.add(wheel);
-  wheels.push(wheel);
- }
-}
-car.position.set(8,0,8);
-scene.add(car);
-
-let driving=false;
-
-// --------------------------------
-// NPC RESIDENTS
-// --------------------------------
-const npcs=[];
-for(let i=0;i<8;i++){
- const npc=new THREE.Group();
- const shirt=new THREE.Mesh(
-  new THREE.CapsuleGeometry(.36,.9,3,6),
-  mat([0xc95745,0x48a6a0,0xb58ad8,0xd2a63e][i%4])
- );
- shirt.position.y=.95;
- npc.add(shirt);
- const face=new THREE.Mesh(
-  new THREE.SphereGeometry(.3,8,8),mat(0xe8b990)
- );
- face.position.y=1.85;
- npc.add(face);
- npc.position.set(-60+Math.random()*120,0,-60+Math.random()*120);
- scene.add(npc);
- npcs.push({
-  group:npc,
-  angle:Math.random()*6.28,
-  origin:npc.position.clone()
- });
-}
-
-// --------------------------------
-// GAME DATA
-// --------------------------------
-let money=500;
-let food=0;
-let mission=0;
+// CAMERA
 let firstPerson=false;
-let night=false;
-let started=false;
-let jumping=false;
-let velocityY=0;
 let yaw=0;
-let activeTarget=null;
-let noticeTimer=null;
+let pitch=0.15;
 
+function updateCamera(){
+  if(firstPerson){
+    camera.position.set(
+      player.position.x,
+      player.position.y+2.45,
+      player.position.z
+    );
+    camera.rotation.order="YXZ";
+    camera.rotation.y=yaw;
+    camera.rotation.x=pitch;
+  }else{
+    const distance=8;
+    const height=4;
+    camera.position.set(
+      player.position.x-Math.sin(yaw)*distance,
+      player.position.y+height,
+      player.position.z-Math.cos(yaw)*distance
+    );
+    camera.lookAt(
+      player.position.x,
+      player.position.y+1.4,
+      player.position.z
+    );
+  }
+}
+
+// CONTROLS
 const keys={};
-
-function say(message){
- const el=document.getElementById("notice");
- el.textContent=message;
- clearTimeout(noticeTimer);
- noticeTimer=setTimeout(()=>el.textContent="Explore Nexora City!",3500);
-}
-
-function updateHUD(){
- document.getElementById("money").textContent=money;
- document.getElementById("homeStatus").textContent=ownsHouse?"Owned":"No";
- document.getElementById("vehicleStatus").textContent=driving?"Driving":"On foot";
- document.getElementById("cameraStatus").textContent=
-  firstPerson?"First Person":"Third Person";
- document.getElementById("missionText").textContent=[
-  "Visit the city shop.",
-  "Buy some food from the shop.",
-  "Visit the Job Centre.",
-  "Complete your first delivery job.",
-  "Buy your first house.",
-  "Explore your new home. Free exploration!"
- ][Math.min(mission,5)];
-}
-
-function addMoney(amount){
- money+=amount;
- updateHUD();
-}
-
-// --------------------------------
-// SAVE / LOAD
-// --------------------------------
-function saveGame(){
- const data={
-  money,food,mission,ownsHouse,
-  x:player.position.x,z:player.position.z
- };
- localStorage.setItem("nexoraLivingWorldSave",JSON.stringify(data));
- say("Game saved successfully!");
-}
-
-function loadGame(){
- const raw=localStorage.getItem("nexoraLivingWorldSave");
- if(!raw){
-  say("No saved game found. Start a new game!");
-  return false;
- }
- try{
-  const data=JSON.parse(raw);
-  money=Number(data.money)||500;
-  food=Number(data.food)||0;
-  mission=Number(data.mission)||0;
-  ownsHouse=!!data.ownsHouse;
-  player.position.set(data.x||0,0,data.z||0);
-  updateHUD();
-  say("Welcome back, Alex! Your game loaded.");
-  return true;
- }catch(e){
-  say("Save file could not be loaded.");
-  return false;
- }
-}
-
-document.getElementById("saveBtn").onclick=saveGame;
-
-// --------------------------------
-// MISSIONS AND INTERACTIONS
-// --------------------------------
-function distanceTo(pos){
- return Math.hypot(
-  player.position.x-pos.x,
-  player.position.z-pos.z
- );
-}
-
-function interact(){
- if(!started)return;
-
- if(insideHouse){
-  insideHouse=false;
-  interior.visible=false;
-  player.position.set(20,0,7);
-  say("You left your house.");
-  return;
- }
-
- if(driving){
-  driving=false;
-  player.position.set(car.position.x+3,0,car.position.z);
-  say("You exited the car.");
-  updateHUD();
-  return;
- }
-
- if(distanceTo(shop.position)<6){
-  if(mission===0){
-   mission=1;
-   say("Welcome to the supermarket! Buy some food.");
-  }else if(money>=20){
-   money-=20;
-   food++;
-   if(mission===1)mission=2;
-   say("Food purchased! You spent $20.");
-  }else{
-   say("Not enough money!");
-  }
-  updateHUD();
-  return;
- }
-
- if(distanceTo(jobCentre.position)<6){
-  if(mission<2){
-   say("Visit the shop first.");
-  }else if(mission===2){
-   mission=3;
-   say("Delivery job accepted! Complete it for $150.");
-  }else if(mission===3){
-   mission=4;
-   addMoney(150);
-   say("Delivery completed! You earned $150.");
-  }else{
-   say("No new jobs available right now.");
-  }
-  updateHUD();
-  return;
- }
-
- if(distanceTo(houseMarker.position)<7){
-  if(!ownsHouse){
-   if(money>=300){
-    money-=300;
-    ownsHouse=true;
-    say("Congratulations! You purchased your first house.");
-   }else{
-    say("Your house costs $300. Earn more money first.");
-   }
-  }else{
-   insideHouse=true;
-   interior.visible=true;
-   player.position.set(130,0,4);
-   say("Welcome home, Alex! Press E to exit.");
-   if(mission===4)mission=5;
-  }
-  updateHUD();
-  return;
- }
-
- if(distanceTo(car.position)<5){
-  driving=true;
-  say("You entered your car. Use WASD to drive.");
-  updateHUD();
-  return;
- }
-
- let closest=null;
- let best=5;
- for(const n of npcs){
-  const d=distanceTo(n.group.position);
-  if(d<best){best=d;closest=n;}
- }
- if(closest){
-  const messages=[
-   "Hello! Welcome to Nexora City.",
-   "The city shop is near the west district.",
-   "You can find jobs at the Job Centre.",
-   "Have a great day, Alex!"
-  ];
-  say(messages[Math.floor(Math.random()*messages.length)]);
-  return;
- }
-
- say("Nothing nearby to interact with.");
-}
-
-document.getElementById("interactBtn").onclick=interact;
-document.querySelector('[data-action="interact"]').onclick=interact;
-
-// --------------------------------
-// KEYBOARD
-// --------------------------------
 addEventListener("keydown",e=>{
- keys[e.key.toLowerCase()]=true;
- if(e.code==="Space")e.preventDefault();
- if(e.key.toLowerCase()==="e"&&!e.repeat)interact();
- if(e.key.toLowerCase()==="v"&&!e.repeat)toggleCamera();
+  keys[e.key.toLowerCase()]=true;
+  if([" ","arrowup","arrowdown"].includes(e.key.toLowerCase()))
+    e.preventDefault();
+
+  if(e.key.toLowerCase()==="v") toggleCamera();
+  if(e.key.toLowerCase()==="e") showMessage("New city missions coming soon!");
 });
 addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
 
-document.querySelectorAll("#mobile button").forEach(btn=>{
- const key=btn.dataset.key;
- btn.addEventListener("pointerdown",e=>{
-  e.preventDefault();keys[key]=true;
- });
- ["pointerup","pointerleave","pointercancel"].forEach(type=>{
-  btn.addEventListener(type,()=>keys[key]=false);
- });
+// Mobile controls
+document.querySelectorAll("[data-key]").forEach(btn=>{
+  const key=btn.dataset.key;
+  btn.addEventListener("pointerdown",e=>{
+    e.preventDefault();
+    keys[key]=true;
+  });
+  ["pointerup","pointerleave","pointercancel"].forEach(event=>{
+    btn.addEventListener(event,()=>keys[key]=false);
+  });
 });
 
-document.querySelector('[data-action="jump"]').onclick=()=>{
- keys["jump"]=true;
- setTimeout(()=>keys["jump"]=false,250);
-};
-document.querySelector('[data-action="run"]').onpointerdown=()=>keys["shift"]=true;
-document.querySelector('[data-action="run"]').onpointerup=()=>keys["shift"]=false;
+// Touch camera look
+let touchX=null;
+renderer.domElement.addEventListener("touchstart",e=>{
+  if(e.touches.length===1) touchX=e.touches[0].clientX;
+},{passive:true});
 
-// --------------------------------
-// CAMERA
-// --------------------------------
-function toggleCamera(){
- firstPerson=!firstPerson;
- updateHUD();
-}
-document.getElementById("cameraBtn").onclick=toggleCamera;
+renderer.domElement.addEventListener("touchmove",e=>{
+  if(touchX!==null && e.touches.length===1){
+    const x=e.touches[0].clientX;
+    yaw-=(x-touchX)*0.006;
+    touchX=x;
+  }
+},{passive:true});
 
-let mouseDown=false,lastMouseX=0;
+renderer.domElement.addEventListener("touchend",()=>touchX=null);
+
+// Mouse camera look
+let dragging=false,lastX=0;
 renderer.domElement.addEventListener("pointerdown",e=>{
- if(e.pointerType==="mouse"){
-  mouseDown=true;
-  lastMouseX=e.clientX;
- }
+  if(e.pointerType==="mouse"){
+    dragging=true;
+    lastX=e.clientX;
+  }
 });
-addEventListener("pointerup",()=>mouseDown=false);
+addEventListener("pointerup",()=>dragging=false);
 addEventListener("pointermove",e=>{
- if(mouseDown){
-  yaw-=(e.clientX-lastMouseX)*.004;
-  lastMouseX=e.clientX;
- }
+  if(dragging){
+    yaw-=(e.clientX-lastX)*0.004;
+    lastX=e.clientX;
+  }
 });
 
-// --------------------------------
-// COLLISION
-// --------------------------------
-function canMove(x,z){
- if(insideHouse)return true;
-
- for(const b of obstacles){
-  if(Math.abs(x-b.x)<b.w/2+.7 &&
-     Math.abs(z-b.z)<b.d/2+.7)return false;
- }
- return Math.abs(x)<100&&Math.abs(z)<100;
+function toggleCamera(){
+  firstPerson=!firstPerson;
+  document.getElementById("camera").textContent=
+    "Camera: "+(firstPerson?"First Person":"Third Person");
 }
+document.getElementById("camera").onclick=toggleCamera;
+document.getElementById("mobileCamera").onclick=toggleCamera;
 
-// --------------------------------
-// MOVEMENT
-// --------------------------------
-function updatePlayer(){
- if(!started)return;
+// GRAPHICS SETTINGS
+const quality=document.getElementById("quality");
+quality.onchange=()=>{
+  const mode=quality.value;
+  if(mode==="balanced"){
+    renderer.setPixelRatio(Math.min(devicePixelRatio,1.25));
+    renderer.shadowMap.enabled=false;
+    document.getElementById("qualityText").textContent=
+      "Graphics: Balanced";
+  }
+  if(mode==="high"){
+    renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));
+    renderer.shadowMap.enabled=true;
+    sun.castShadow=true;
+    sun.shadow.mapSize.set(1024,1024);
+    document.getElementById("qualityText").textContent=
+      "Graphics: High";
+  }
+  if(mode==="4k"){
+    renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+    renderer.shadowMap.enabled=true;
+    sun.castShadow=true;
+    sun.shadow.mapSize.set(2048,2048);
+    document.getElementById("qualityText").textContent=
+      "Graphics: 4K Mode (device dependent)";
+    showMessage("4K mode selected. Performance depends on your device.");
+  }
+};
 
- let forward=0,side=0;
- if(keys["w"]||keys["arrowup"])forward++;
- if(keys["s"]||keys["arrowdown"])forward--;
- if(keys["a"]||keys["arrowleft"])side--;
- if(keys["d"]||keys["arrowright"])side++;
-
- if(forward||side){
-  const dir=new THREE.Vector3(side,0,-forward).normalize();
-  dir.applyAxisAngle(new THREE.Vector3(0,1,0),yaw);
-
-  const speed=driving?(keys["shift"]?.32:.19):
-    (keys["shift"]?.17:.095);
-
-  if(driving){
-   car.position.x+=dir.x*speed;
-   car.position.z+=dir.z*speed;
-   car.rotation.y=Math.atan2(dir.x,dir.z);
-   player.position.set(
-    car.position.x,0,car.position.z
-   );
-   wheels.forEach(w=>w.rotation.x+=speed);
+// DAY / NIGHT
+let night=false;
+document.getElementById("day").onclick=()=>{
+  night=!night;
+  if(night){
+    scene.background.set(0x071326);
+    scene.fog.color.set(0x071326);
+    sun.intensity=0.25;
+    skyLight.intensity=0.5;
   }else{
-   const nx=player.position.x+dir.x*speed;
-   const nz=player.position.z+dir.z*speed;
-   if(canMove(nx,player.position.z))player.position.x=nx;
-   if(canMove(player.position.x,nz))player.position.z=nz;
-   player.rotation.y=Math.atan2(dir.x,dir.z);
+    scene.background.set(0x8fc9e8);
+    scene.fog.color.set(0x8fc9e8);
+    sun.intensity=2;
+    skyLight.intensity=2;
   }
- }
+};
 
- if(!driving){
-  if(keys["jump"]||keys[" "]){
-   if(!jumping){
-    jumping=true;
-    velocityY=.22;
-   }
-  }
-  player.position.y+=velocityY;
-  velocityY-=.012;
-  if(player.position.y<=0){
-   player.position.y=0;
-   velocityY=0;
-   jumping=false;
-  }
- }
+// MESSAGE
+function showMessage(text){
+  const el=document.getElementById("message");
+  el.textContent=text;
+  el.style.display="block";
+  setTimeout(()=>el.style.display="none",2500);
+}
 
- // Camera follows player or car
- const subject=driving?car:player;
+// PLAYER MOVEMENT
+let velocityY=0;
+let onGround=true;
 
- if(firstPerson&&!driving){
-  camera.position.lerp(
-   new THREE.Vector3(
-    player.position.x,
-    player.position.y+1.6,
-    player.position.z
-   ),.2
+function updatePlayer(delta){
+  const forward=(keys["w"]||keys["arrowup"]?1:0)-
+    (keys["s"]||keys["arrowdown"]?1:0);
+  const sideways=(keys["d"]||keys["arrowright"]?1:0)-
+    (keys["a"]||keys["arrowleft"]?1:0);
+
+  const running=keys["shift"]?1.8:1;
+  const speed=12*running*delta;
+
+  const direction=new THREE.Vector3(
+    Math.sin(yaw),0,Math.cos(yaw)
   );
-  camera.rotation.order="YXZ";
-  camera.rotation.y=yaw;
-  camera.rotation.x=0;
- }else{
-  const offset=new THREE.Vector3(0,5,9);
-  offset.applyAxisAngle(new THREE.Vector3(0,1,0),yaw);
-  const target=subject.position.clone().add(offset);
-  camera.position.lerp(target,.12);
-  camera.lookAt(subject.position.x,subject.position.y+1,subject.position.z);
- }
+  const right=new THREE.Vector3(
+    Math.cos(yaw),0,-Math.sin(yaw)
+  );
+
+  player.position.x+=
+    (direction.x*forward+right.x*sideways)*speed;
+  player.position.z+=
+    (direction.z*forward+right.z*sideways)*speed;
+
+  if(forward!==0||sideways!==0){
+    player.rotation.y=Math.atan2(
+      direction.x*forward+right.x*sideways,
+      direction.z*forward+right.z*sideways
+    );
+  }
+
+  if(keys[" "]&&onGround){
+    velocityY=10;
+    onGround=false;
+  }
+
+  velocityY-=25*delta;
+  player.position.y+=velocityY*delta;
+
+  if(player.position.y<0){
+    player.position.y=0;
+    velocityY=0;
+    onGround=true;
+  }
+
+  const limit=cityLimit*0.9;
+  player.position.x=THREE.MathUtils.clamp(
+    player.position.x,-limit,limit
+  );
+  player.position.z=THREE.MathUtils.clamp(
+    player.position.z,-limit,limit
+  );
 }
 
-// --------------------------------
-// NPC WALKING
-// --------------------------------
-function updateNPCs(){
- npcs.forEach(n=>{
-  n.angle+=.004;
-  n.group.position.x=n.origin.x+Math.sin(n.angle)*3;
-  n.group.position.z=n.origin.z+Math.cos(n.angle)*3;
-  n.group.rotation.y=n.angle;
- });
-}
+// RESIZE
+addEventListener("resize",()=>{
+  camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
 
-// --------------------------------
-// INTERACTION PROMPT
-// --------------------------------
-function updateInteraction(){
- if(!started||insideHouse||driving){
-  document.getElementById("interaction").style.display=
-   (insideHouse||driving)?"block":"none";
-  document.getElementById("interactBtn").textContent=
-   insideHouse?"EXIT HOUSE":"EXIT CAR";
-  return;
- }
+// GAME LOOP
+const clock=new THREE.Clock();
 
- const targets=[
-  {name:"SHOP",pos:shop.position},
-  {name:"JOB CENTRE",pos:jobCentre.position},
-  {name:"HOUSE",pos:houseMarker.position},
-  {name:"CAR",pos:car.position}
- ];
-
- activeTarget=null;
- for(const t of targets){
-  if(distanceTo(t.pos)<6){activeTarget=t;break;}
- }
-
- const el=document.getElementById("interaction");
- el.style.display=activeTarget?"block":"none";
- if(activeTarget){
-  document.getElementById("interactBtn").textContent=
-   "E - "+activeTarget.name;
- }
-}
-
-// --------------------------------
-// MAP
-// --------------------------------
-const map=document.getElementById("map");
-const ctx=map.getContext("2d");
-
-function drawMap(){
- ctx.fillStyle="#304b3b";
- ctx.fillRect(0,0,230,230);
- ctx.fillStyle="#737d85";
-
- for(let i=0;i<230;i+=69){
-  ctx.fillRect(i-3,0,6,230);
-  ctx.fillRect(0,i-3,230,6);
- }
-
- function dot(x,z,color){
-  ctx.fillStyle=color;
-  ctx.beginPath();
-  ctx.arc(115+x*.95,115+z*.95,4,0,Math.PI*2);
-  ctx.fill();
- }
- dot(shop.position.x,shop.position.z,"#39e39a");
- dot(jobCentre.position.x,jobCentre.position.z,"#ffc84b");
- dot(houseMarker.position.x,houseMarker.position.z,"#62c6ff");
- dot(driving?car.position.x:player.position.x,
-     driving?car.position.z:player.position.z,"#ffffff");
-}
-
-// --------------------------------
-// DAY NIGHT
-// --------------------------------
-document.getElementById("dayBtn").onclick=()=>{
- night=!night;
- if(night){
-  scene.background.set(0x111d39);
-  scene.fog.color.set(0x111d39);
-  sun.intensity=.3;
-  say("Night has arrived in Nexora City.");
- }else{
-  scene.background.set(0x83bddd);
-  scene.fog.color.set(0x83bddd);
-  sun.intensity=1.5;
-  say("Morning has arrived in Nexora City.");
- }
-};
-
-// --------------------------------
-// START / CONTINUE
-// --------------------------------
-document.getElementById("newGame").onclick=()=>{
- money=500;food=0;mission=0;ownsHouse=false;
- player.position.set(0,0,0);
- started=true;
- document.getElementById("menu").style.display="none";
- updateHUD();
- say("Your new life in Nexora City has begun!");
-};
-
-document.getElementById("loadGame").onclick=()=>{
- if(loadGame()){
-  started=true;
-  document.getElementById("menu").style.display="none";
- }
-};
-
-// --------------------------------
-// MAIN LOOP
-// --------------------------------
 function animate(){
- requestAnimationFrame(animate);
- updatePlayer();
- updateNPCs();
- updateInteraction();
- drawMap();
- renderer.render(scene,camera);
+  requestAnimationFrame(animate);
+  const delta=Math.min(clock.getDelta(),0.04);
+
+  updatePlayer(delta);
+  updateCamera();
+
+  document.getElementById("status").textContent=
+    "Position: "+Math.round(player.position.x)+
+    ", "+Math.round(player.position.z);
+
+  renderer.render(scene,camera);
 }
+
+showMessage("Welcome to Nexora City, Alex!");
 animate();
 
-updateHUD();
-
-addEventListener("resize",()=>{
- camera.aspect=innerWidth/innerHeight;
- camera.updateProjectionMatrix();
- renderer.setSize(innerWidth,innerHeight);
-});
 </script>
 </body>
 </html>
